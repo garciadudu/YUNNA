@@ -1,0 +1,96 @@
+﻿
+@{
+    ViewData["Title"] = "Relatorio";
+}
+
+<h2>Relatório</h2>
+
+<form id="filtro">
+    <div class="row">
+        <div class="col-lg-2">
+            Nome
+        </div>
+        <div class="col-lg-3">
+            <input type="text" id="nome" />
+        </div>
+        <div class="col-lg-2">
+            Ativo
+        </div>
+        <div class="col-lg-3">
+            <select id="ativo">
+                <option value="0">Sim</option>
+                <option value="1">Não</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" type="button" onclick="filtraUsuarios();">Filtrar</button>
+    </div>
+</form>
+<div id="tables">
+
+</div>
+
+<script>
+    function filtraUsuarios() {
+        var filtro = {
+            nome: "",
+            ativo: 0,
+        };
+
+        filtro.nome = $("#nome").val();
+        filtro.ativo = $("#ativo").val();
+
+        $.ajax({
+            url: "@Url.Action("RelatorioLista", "Usuario")",
+            dataType: 'json',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(filtro),
+            processData: false,
+            success: function (data, textStatus, jQxhr) {
+                $("#tables").html("");
+
+                var tables = "<table border='1'>";
+
+                tables += "<tr>" +
+                    "<td>Nome</td>" +
+                    "<td>Dt.Nasc.</td>" +
+                    "<td>E-mail</td>" +
+                    "<td>Sexo</td>" +
+                    "<td>Ativo</td>" +
+                    "</tr>";
+
+                for (var x = 0; x < data.length; x++) {
+                    tables += "<tr>" +
+                        "<td>" + data[x].nome + "</td>" +
+                        "<td>" + formataData(data[x].dataNascimento) + "</td>" +
+                        "<td>" + data[x].email + "</td>" +
+                        "<td>" + data[x].sexo + "</td>";
+
+                    tables += "<td>"
+
+                    if (data[x].ativo == 0) {
+                        tables += "Ativo";
+                    } else {
+                        tables += "Inativo";
+                    }
+
+                    tables += "</td>";
+
+                    tables += "</tr>";
+                }
+
+                tables += "</table>";
+
+                $("#tables").html(tables);
+            },
+            error: function( jqXhr, textStatus, errorThrown ){
+                console.log( errorThrown );
+            }
+        });
+    }
+
+
+    function formataData(date) {
+        return date.substr(8,2) + "/"+ date.substr(5,2) + "/" + date.substr(0,4);
+    }
+</script>
